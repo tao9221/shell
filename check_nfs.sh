@@ -29,7 +29,7 @@ get_info(){
 
 nfs_info(){
     message=""
-    now_nfs_mount_ip=$(netstat -nat|egrep ':2049 '|awk  '$NF~/ESTABLISHED|TIME_WAIT/{sub(/:[0-9]+/,"",$(NF-1));print $(NF-1)}')
+    now_nfs_mount_ip=$(for n in $(seq 2);do netstat -nat|egrep "${IPADDR}:2049";sleep 4;done |awk  '{sub(/:[0-9]+/,"",$(NF-1));num[$(NF-1)]+=1}END{for(i in num)print i}') 
     old_nfs_mount_ip=$(awk -F"|" '{num[$1]++}END{for(n in num){print n}}' ${REFILE})
     nfs_status=$(for i in ${old_nfs_mount_ip};do echo -n "$i|";echo $now_nfs_mount_ip | grep -sw "$i" 2>&1 >>/dev/null;echo $?;done)
     for j in ${nfs_status};do
